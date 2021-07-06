@@ -12,8 +12,8 @@ class Vendor extends SitemapHttpProcessor{
 
 	public array $first = [
 		'https://www.savedollarstores.com/sitemap-1-1.xml',
-		'https://www.savedollarstores.com/sitemap-1-12.xml',
-		/*'https://www.savedollarstores.com/sitemap-1-3.xml',
+		/*'https://www.savedollarstores.com/sitemap-1-12.xml',
+		'https://www.savedollarstores.com/sitemap-1-3.xml',
 		'https://www.savedollarstores.com/sitemap-1-4.xml',
 		'https://www.savedollarstores.com/sitemap-1-5.xml',
 		'https://www.savedollarstores.com/sitemap-1-6.xml',
@@ -26,6 +26,8 @@ class Vendor extends SitemapHttpProcessor{
 		'https://www.savedollarstores.com/sitemap-1-13.xml',
 		'https://www.savedollarstores.com/sitemap-1-14.xml',*/
 	];
+
+	protected ?int $max_products = 10;
 
 	public const CATEGORY_LINK_CSS_SELECTORS = ['url loc'];
 
