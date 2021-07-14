@@ -23,6 +23,18 @@ class Vendor extends SitemapHttpProcessor{
 		return str_contains( $link->getUrl(), 'item_' );
     }
 
+
+    protected function isValidFeedItem( FeedItem $fi ): bool
+    {
+        if ( $fi->isGroup() ) {
+        	$fi->setChildProducts( array_values(
+                array_filter( $fi->getChildProducts(), static fn( FeedItem $item ) => !empty( $item->getMpn() ) && count( $item->getImages() ) )
+            ) );
+            return count( $fi->getChildProducts() );
+        }
+        return !empty( $fi->getMpn() ) && count( $fi->getImages() );
+    }
+
 }
 
 ?>
