@@ -1,5 +1,5 @@
 <?php 
-namespace App\Feeds\Vendors\DSD;
+namespace App\Feeds\Vendors\DDG;
 
 use App\Feeds\Processor\SitemapHttpProcessor;
 use App\Feeds\Feed\FeedItem;

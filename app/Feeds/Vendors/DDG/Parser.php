@@ -1,6 +1,6 @@
 <?php  
 
-namespace App\Feeds\Vendors\DSD;
+namespace App\Feeds\Vendors\DDG;
 
 use App\Feeds\Feed\FeedItem;
 use App\Feeds\Parser\HtmlParser;
