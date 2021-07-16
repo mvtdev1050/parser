@@ -44,7 +44,13 @@ class Parser extends HtmlParser{
 
 	public function getImages(): array{
 
-		return $this->getSrcImages('.columnright form table a[rel="lightbox"] img');
+		$src = $this->getSrcImages('.columnright form table a[rel="lightbox"] img');
+		foreach($src as $key=>$img){
+			$new_src = explode("?image=",$img);
+			$new_src = explode('&width', $new_src[1]);
+			$src[$key] = $new_src[0];
+		}
+		return $src;
 
 	}
 
@@ -106,7 +112,7 @@ class Parser extends HtmlParser{
 
         	$fi = clone $parent_fi;
         	$fi->setMpn( str_replace(" ","-",$this->getProduct())."-".$new_val[1] );
-            $fi->setProduct( $this->getProduct() );
+            $fi->setProduct( $this->getProduct().' '.$new_val[1]);
             $fi->setCostToUs( StringHelper::getMoney( $value ) );
             $fi->setRAvail( self::DEFAULT_AVAIL_NUMBER  );
             $child[] = $fi;
