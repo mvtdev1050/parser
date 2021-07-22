@@ -13,7 +13,7 @@ class Vendor extends SitemapHttpProcessor{
 		'https://www.dallasdogs.com/sitemap.xml',
 	];
 
-	protected ?int $max_products = 10;
+	//protected ?int $max_products = 10;
 
 	public const CATEGORY_LINK_CSS_SELECTORS = ['url loc'];
 
@@ -26,6 +26,7 @@ class Vendor extends SitemapHttpProcessor{
 
     protected function isValidFeedItem( FeedItem $fi ): bool
     {
+    	//echo $fi->isGroup()."<br>";
         if ( $fi->isGroup() ) {
         	$fi->setChildProducts( array_values(
                 array_filter( $fi->getChildProducts(), static fn( FeedItem $item ) => !empty( $item->getMpn() ) && count( $item->getImages() ) )

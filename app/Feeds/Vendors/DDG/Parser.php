@@ -11,23 +11,67 @@ use Symfony\Component\DomCrawler\Crawler;
 class Parser extends HtmlParser{
 
 	private ?array$attributes = null;
-
+	private ?int$stock = self::DEFAULT_AVAIL_NUMBER;
 	public function beforeParse(): void{
-        
-        $option_lists = $this->filter( '.columnright form table input[name="optval1"]' );
 
-        $option_lists->each( function ( ParserCrawler $list ) use ( &$options ) {
-        	$val = $list->attr('value');
-			if(str_contains($val, ':')){
-				$val = explode(":",$val);
-				$size = $val[0];
-				$new_price = $val[1]+$this->getCostToUs();
-            }else{
-            	$new_price = $this->getCostToUs();
-            	$size = $val;
-            }
-            $this->attributes[ 'size_'.$size ] = $new_price;
-        });
+
+        if($this->exists( '.columnright form table input[name="optval1"]')){
+
+	        $option_lists = $this->filter( '.columnright form table input[name="optval1"]' );
+
+	        $option_lists->each( function ( ParserCrawler $list ) use ( &$options ) {
+	        	$val = $list->attr('value');
+	        	if(str_contains($val, ':')){
+					$val = explode(":",$val);
+					$size = $val[0];
+					$new_price = $val[1]+$this->getCostToUs();
+	            }else{
+	            	$new_price = $this->getCostToUs();
+	            	$size = $val;
+	            }
+	            $this->attributes[ 'size_'.$size ] = $new_price;
+	        });
+        }else{
+        	$this->stock = 0;
+        }
+
+        $this->filter( '.columnright form table td[colspan="2"]' )->each( function ( ParserCrawler $c ) {
+			$data = explode("<br>",$c->html());
+			foreach($data as $val){
+				$size = '';
+				$new_price = 0;
+				$val = strip_tags( $val );
+				if(str_contains($val,'(Was')){
+					$new_val = explode(" ",$val);
+					if(str_contains($new_val[0],':')){
+						$new_p = explode(":",$new_val[0]);
+						$size = $new_p[1];
+					}else{
+						$size = $new_val[0];
+					}
+					$new_price = ltrim($new_val[2],'$');
+					$new_price = rtrim($new_val[2],')');
+				}else{
+					if(str_contains($val,'$')){
+						$new_val = explode(" ",$val);
+						if(str_contains($new_val[0],':')){
+							$new_p = explode(":",$new_val[0]);
+							$size = $new_p[1];
+						}else{
+							$size = $new_val[0];
+						}
+						if(array_key_exists(1,$new_val)){
+							$new_price = ltrim($new_val[1],'$');
+						}else{
+							$new_price = $new_val[0];
+						}
+					}else{
+						$new_price = $this->getCostToUs();
+					}
+				}
+				$this->attributes[ 'size_'.$size ] = $new_price;
+			}
+		});
     }
 	
 	public function getMpn(): string{
@@ -62,7 +106,7 @@ class Parser extends HtmlParser{
 
 	public function getDescription(): string{
 
-		return $this->getHtml('.columnright form table tr td[align="left"] p');
+		return $this->getHtml('.columnright form table tr td[align="left"]');
 
 	}
 
@@ -93,7 +137,11 @@ class Parser extends HtmlParser{
 
 	public function getAvail(): ?int{
 
-        return self::DEFAULT_AVAIL_NUMBER;
+        if($this->exists( '.columnright form table input[name="optval1"]')){
+        	return self::DEFAULT_AVAIL_NUMBER;
+        }else{
+        	return 0;
+        }
     
     }
 
@@ -105,19 +153,19 @@ class Parser extends HtmlParser{
     public function getChildProducts( FeedItem $parent_fi ): array
     {
         $child = [];
-
+        if($this->getProduct()==='Pink Leopard Sweater'){
+			unset($this->attributes['size_Pink']);
+		}
         foreach($this->attributes as $key=>$value){
-
-        	$new_val = explode("_",$key);
-
+    		$new_val = explode("_",$key);
         	$fi = clone $parent_fi;
         	$fi->setMpn( str_replace(" ","-",$this->getProduct())."-".$new_val[1] );
-            $fi->setProduct( $this->getProduct().' '.$new_val[1]);
+            $fi->setProduct( 'Size: '.$new_val[1]);
             $fi->setCostToUs( StringHelper::getMoney( $value ) );
-            $fi->setRAvail( self::DEFAULT_AVAIL_NUMBER  );
+            $fi->setRAvail( $this->stock  );
             $child[] = $fi;
+        	
         }
-        
         return $child;
     }
 
