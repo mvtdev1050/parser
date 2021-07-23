@@ -137,7 +137,7 @@ class Parser extends HtmlParser{
 
 	public function getAvail(): ?int{
 
-        if($this->exists( '.columnright form table input[name="optval1"]')){
+        if($this->exists( '.columnright form table input[name="optval1"]') || $this->exists('.columnright form table .pricereg')){
         	return self::DEFAULT_AVAIL_NUMBER;
         }else{
         	return 0;
@@ -153,17 +153,23 @@ class Parser extends HtmlParser{
     public function getChildProducts( FeedItem $parent_fi ): array
     {
         $child = [];
+
+        unset($this->attributes['size_']);
+        
         if($this->getProduct()==='Pink Leopard Sweater'){
 			unset($this->attributes['size_Pink']);
 		}
+
         foreach($this->attributes as $key=>$value){
-    		$new_val = explode("_",$key);
-        	$fi = clone $parent_fi;
-        	$fi->setMpn( str_replace(" ","-",$this->getProduct())."-".$new_val[1] );
-            $fi->setProduct( 'Size: '.$new_val[1]);
-            $fi->setCostToUs( StringHelper::getMoney( $value ) );
-            $fi->setRAvail( $this->stock  );
-            $child[] = $fi;
+    		if(!str_contains($value,'Price:')){
+    			$new_val = explode("_",$key);
+	        	$fi = clone $parent_fi;
+	        	$fi->setMpn( str_replace(" ","-",$this->getProduct())."-".$new_val[1] );
+	            $fi->setProduct( 'Size: '.$new_val[1]);
+	            $fi->setCostToUs( StringHelper::getMoney( $value ) );
+	            $fi->setRAvail( $this->stock  );
+	            $child[] = $fi;
+    		}
         	
         }
         return $child;
