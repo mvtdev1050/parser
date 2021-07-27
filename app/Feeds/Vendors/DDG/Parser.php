@@ -152,7 +152,7 @@ class Parser extends HtmlParser{
 
 	public function getAvail(): ?int{
 
-        if($this->exists( '.columnright form table input[name="optval1"]') || $this->exists('.columnright form table .pricereg')){
+        if(($this->exists( '.columnright form table input[name="optval1"]') || $this->exists('.columnright form table .pricereg')) && !str_contains($this->getText('.columnright form table tr td[align="left"].accent'),'out of stock')){
         	return self::DEFAULT_AVAIL_NUMBER;
         }else{
         	return 0;
